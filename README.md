@@ -2,7 +2,7 @@
 
 # Description
 
-This Employee Tracker app is a nodeJS-based application for creating and managing organizational information for any company. The app enables the user to create, update, and delete departments, roles, and employees with ease  
+This Employee Tracker app is a nodeJS-based application for creating and managing organizational information for any company. The app enables the user to create, update, and delete departments, roles, and employees with ease.  
 
 
 # Usage
