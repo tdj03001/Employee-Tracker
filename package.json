@@ -4,7 +4,8 @@
   "description": "department, role, and employee management system",
   "main": "employee.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "start": "node employee.js"
   },
   "repository": {
     "type": "git",
