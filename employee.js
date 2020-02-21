@@ -1,6 +1,7 @@
 const mysql = require("mysql");
 const inquirer = require("inquirer");
 const cTable = require('console.table');
+const util = require('util');
 
 
 //connection for sql db
@@ -21,16 +22,18 @@ connection.connect(function (err) {
   start();
 });
 
+connection.query = util.promisify(connection.query);
+
 // function to prompt user to choose an action
-function start() {
-  inquirer
+async function start() {
+  await inquirer
     .prompt({
       name: "whatToDo",
       type: "list",
       message: "What would you like to do",
       choices: ["Add a department", "Add a role", "Add an employee", "View departments", "View roles", "View employees", "Update employee role", "Remove an employee", "EXIT"]
     })
-    .then(function (answer) {
+    .then(async answer => {
       if (answer.whatToDo === "Add a department") {
         addDept();
       }
@@ -41,6 +44,7 @@ function start() {
         addEmployee();
       }
       else if (answer.whatToDo === "View departments") {
+        await getDepts();
         viewDept();
       }
       else if (answer.whatToDo === "View roles") {
@@ -154,26 +158,59 @@ function addEmployee() {
     })
 }
 
-//building this so it shows all depts. Could have built to show all depts with all roles and all employees. Enhancement?
-function viewDept() {
+let choices = [];
+
+async function getDepts() {
   const query = "SELECT name FROM department";
-  console.log("Here are all current departments");
-  connection.query(query, function (err, res) {
-    if (err) throw err;
-    for (let i = 0; i < res.length; i++) {
-      console.log(res[i].name);
-    }
-    start();
+  await connection.query(query).then(res => {
+    res.forEach(data => {
+      choices.push(data.name);
+    });
   })
 }
 
+
+function viewDept() {
+  inquirer.prompt([
+    {
+      name: "chooseDept",
+      type: "list",
+      message: "Which department would you like to view?",
+      choices: choices
+    }
+  ])
+    .then(function (answer) {
+      const query2 = "SELECT name FROM department";
+      console.log("Here is the department you requested");
+      connection.query(query2, function (err, res) {
+        if (err) throw err;
+        for (let i = 0; i < res.length; i++) {
+
+          console.table([
+            {
+              "Dept Name": answer.name
+            }]);
+        }
+        start();
+      })
+    })
+}
+
+
+
+
 function viewRoles() {
-  const query = "SELECT title FROM role";
+  const query = "SELECT * FROM role";
   console.log("Here are all current roles");
   connection.query(query, function (err, res) {
     if (err) throw err;
     for (let i = 0; i < res.length; i++) {
-      console.log(res[i].title);
+      console.table([
+        {
+          "Role": res[i].title,
+          "Salary": res[i].salary
+        }
+      ]);
     }
     start();
   }
@@ -181,18 +218,26 @@ function viewRoles() {
 }
 
 function viewEmployee() {
-  const query = ("SELECT * FROM employee");
+  const query = ("SELECT * FROM employee LEFT JOIN role ON employee.role_id=role.id;");
   console.log("Here are all current employees");
   connection.query(query, function (err, res) {
     if (err) throw err;
     for (let i = 0; i < res.length; i++) {
-      console.log(
+      console.table([
         {
-          "last name": res[i].last_name,
-          "first name": res[i].first_name
-        })
+          "First Name": res[i].first_name,
+          "Last Name": res[i].last_name,
+          "Role": res[i].title,
+          "Salary": res[i].salary
+        }
+      ]);
     }
     start();
   })
 }
 
+/*=================DEV NOTES=====================================================================================
+
+- getDepts/viewDept: getDepts is pushing results to choices array, but choices is undefined when referenced in viewDept function. Why?
+
+================================================================================================================*/
