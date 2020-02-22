@@ -31,7 +31,7 @@ async function start() {
       name: "whatToDo",
       type: "list",
       message: "What would you like to do",
-      choices: ["Add a department", "Add a role", "Add an employee", "View department", "View role", "View employees", "Update employee role", "View entire organization", "EXIT"]
+      choices: ["Add a department", "Add a role", "Add an employee", "View department", "View role", "View employee", "Update employee role", "View entire organization", "EXIT"]
     })
     .then(async answer => {
       if (answer.whatToDo === "Add a department") {
@@ -51,7 +51,8 @@ async function start() {
         await getRole();
         viewRole();
       }
-      else if (answer.whatToDo === "View employees") {
+      else if (answer.whatToDo === "View employee") {
+        await getEmployee();
         viewEmployee();
       }
       else if (answer.whatToDo === "Update employee role") {
@@ -197,34 +198,11 @@ function viewDept() {
               "Staff last name": res[i].last_name,
               "Role": res[i].title
             }]);
-        }
-
-        start();
-
+        } start();
       })
     })
 }
 
-
-
-
-// function viewRole() {
-//   const query = "SELECT * FROM role";
-//   console.log("Here are all current roles");
-//   connection.query(query, function (err, res) {
-//     if (err) throw err;
-//     for (let i = 0; i < res.length; i++) {
-//       console.table([
-//         {
-//           "Role": res[i].title,
-//           "Salary": res[i].salary
-//         }
-//       ]);
-//     }
-//     start();
-//   }
-//   )
-// }
 
 let roleChoices = [];
 
@@ -236,7 +214,6 @@ async function getRole() {
     });
   })
 }
-
 
 function viewRole() {
   inquirer.prompt([
@@ -262,36 +239,67 @@ function viewRole() {
               "Dept Name": res[i].name,
               "Salary": res[i].salary
             }]);
-        }
+        } start();
+      })
+    })
+}
 
-        start();
+let employeeChoices1 = [];
+let employeeChoices2 = [];
 
+async function getEmployee() {
+  const query1 = "SELECT * FROM employee";
+  await connection.query(query1).then(res => {
+    res.forEach(data => {
+      employeeChoices1.push(data.first_name);
+    });
+  })
+  const query2 = "SELECT * FROM employee"
+  await connection.query(query2).then(res => {
+    res.forEach(data => {
+      employeeChoices2.push(data.last_name);
+    })
+  })
+
+}
+
+function viewEmployee() {
+  inquirer.prompt([
+    {
+      name: "chooseEmployee1",
+      type: "list",
+      message: "First name of the employee would you like to view?",
+      choices: employeeChoices1
+    },
+    {
+      name: "chooseEmployee2",
+      type: "list",
+      message: "Last name of the employee would you like to view?",
+      choices: employeeChoices2
+    }
+  ])
+    .then(function (answer) {
+      const query2 = "SELECT * FROM staffcms_db.employee LEFT JOIN role on employee.role_id = role.id WHERE first_name = '" + answer.chooseEmployee1 + "' and last_name='" + answer.chooseEmployee2 + "'";
+      console.log("Here is the employee you requested");
+      // const dummyArr = [];
+      connection.query(query2, function (err, res) {
+        if (err) throw err;
+        for (let i = 0; i < res.length; i++) {
+          // console.log(res[i].name)    try loop into an array, console.table outside loop
+          // dummyArr.push(res[i]).name;
+          console.table([
+            {
+              "First Name": res[i].first_name,
+              "Last Name": res[i].last_name,
+              "Role": res[i].title,
+              "Salary": res[i].salary
+            }]);
+        } start();
       })
     })
 }
 
 
-
-
-
-function viewEmployee() {
-  const query = ("SELECT * FROM employee LEFT JOIN role ON employee.role_id=role.id;");
-  console.log("Here are all current employees");
-  connection.query(query, function (err, res) {
-    if (err) throw err;
-    for (let i = 0; i < res.length; i++) {
-      console.table([
-        {
-          "First Name": res[i].first_name,
-          "Last Name": res[i].last_name,
-          "Role": res[i].title,
-          "Salary": res[i].salary
-        }
-      ]);
-    }
-    start();
-  })
-}
 
 function viewOrg() {
   const query = ("SELECT * FROM department LEFT JOIN role on department.id = role.department_id JOIN employee on employee.role_id = role.id;");
