@@ -31,7 +31,7 @@ async function start() {
       name: "whatToDo",
       type: "list",
       message: "What would you like to do",
-      choices: ["Add a department", "Add a role", "Add an employee", "View departments", "View roles", "View employees", "Update employee role", "Remove an employee", "EXIT"]
+      choices: ["Add a department", "Add a role", "Add an employee", "View departments", "View roles", "View employees", "Update employee role", "View entire organization", "EXIT"]
     })
     .then(async answer => {
       if (answer.whatToDo === "Add a department") {
@@ -56,8 +56,8 @@ async function start() {
       else if (answer.whatToDo === "Update employee role") {
         updateEmployeeRole();
       }
-      else if (answer.whatToDo === "Remove an employee") {
-        removeEmployee();
+      else if (answer.whatToDo === "View entire organization") {
+        viewOrg();
       } else {
         connection.end();
       }
@@ -180,18 +180,25 @@ function viewDept() {
     }
   ])
     .then(function (answer) {
-      const query2 = "SELECT name FROM department";
+      const query2 = "SELECT * FROM department LEFT JOIN role on department.id = role.department_id JOIN employee on employee.role_id = role.id WHERE department.name ='" + answer.chooseDept + "'";
       console.log("Here is the department you requested");
+      // const dummyArr = [];
       connection.query(query2, function (err, res) {
         if (err) throw err;
         for (let i = 0; i < res.length; i++) {
-
+          // console.log(res[i].name)    try loop into an array, console.table outside loop
+          // dummyArr.push(res[i]).name;
           console.table([
             {
-              "Dept Name": answer.name
+              "Dept Name": res[i].name,
+              "Staff first name": res[i].first_name,
+              "Staff last name": res[i].last_name,
+              "Role": res[i].title
             }]);
         }
+
         start();
+
       })
     })
 }
@@ -231,6 +238,26 @@ function viewEmployee() {
           "Salary": res[i].salary
         }
       ]);
+    }
+    start();
+  })
+}
+
+function viewOrg() {
+  const query = ("SELECT * FROM department LEFT JOIN role on department.id = role.department_id JOIN employee on employee.role_id = role.id;");
+  console.log("Here is the whole company");
+  connection.query(query, function (err, res) {
+    if (err) throw err;
+    for (let i = 0; i < res.length; i++) {
+      console.table([
+        {
+          "Department": res[i].name,
+          "Title": res[i].title,
+          "Salary": res[i].salary,
+          "First Name": res[i].first_name,
+          "Last Name": res[i].last_name
+        }
+      ])
     }
     start();
   })
