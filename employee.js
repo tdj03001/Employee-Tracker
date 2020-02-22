@@ -31,7 +31,7 @@ async function start() {
       name: "whatToDo",
       type: "list",
       message: "What would you like to do",
-      choices: ["Add a department", "Add a role", "Add an employee", "View departments", "View roles", "View employees", "Update employee role", "View entire organization", "EXIT"]
+      choices: ["Add a department", "Add a role", "Add an employee", "View department", "View role", "View employees", "Update employee role", "View entire organization", "EXIT"]
     })
     .then(async answer => {
       if (answer.whatToDo === "Add a department") {
@@ -43,12 +43,13 @@ async function start() {
       else if (answer.whatToDo === "Add an employee") {
         addEmployee();
       }
-      else if (answer.whatToDo === "View departments") {
+      else if (answer.whatToDo === "View department") {
         await getDepts();
         viewDept();
       }
-      else if (answer.whatToDo === "View roles") {
-        viewRoles();
+      else if (answer.whatToDo === "View role") {
+        await getRole();
+        viewRole();
       }
       else if (answer.whatToDo === "View employees") {
         viewEmployee();
@@ -167,6 +168,7 @@ async function getDepts() {
       choices.push(data.name);
     });
   })
+  console.log(choices);
 }
 
 
@@ -206,23 +208,71 @@ function viewDept() {
 
 
 
-function viewRoles() {
-  const query = "SELECT * FROM role";
-  console.log("Here are all current roles");
-  connection.query(query, function (err, res) {
-    if (err) throw err;
-    for (let i = 0; i < res.length; i++) {
-      console.table([
-        {
-          "Role": res[i].title,
-          "Salary": res[i].salary
-        }
-      ]);
-    }
-    start();
-  }
-  )
+// function viewRole() {
+//   const query = "SELECT * FROM role";
+//   console.log("Here are all current roles");
+//   connection.query(query, function (err, res) {
+//     if (err) throw err;
+//     for (let i = 0; i < res.length; i++) {
+//       console.table([
+//         {
+//           "Role": res[i].title,
+//           "Salary": res[i].salary
+//         }
+//       ]);
+//     }
+//     start();
+//   }
+//   )
+// }
+
+let roleChoices = [];
+
+async function getRole() {
+  const query = "SELECT title FROM staffcms_db.role";
+  await connection.query(query).then(res => {
+    res.forEach(data => {
+      roleChoices.push(data.title);
+    });
+  })
 }
+
+
+function viewRole() {
+  inquirer.prompt([
+    {
+      name: "chooseRole",
+      type: "list",
+      message: "Which role would you like to view?",
+      choices: roleChoices
+    }
+  ])
+    .then(function (answer) {
+      const query2 = "SELECT * FROM department LEFT JOIN role on department.id = role.department_id JOIN employee on employee.role_id = role.id WHERE role.title ='" + answer.chooseRole + "'";
+      console.log("Here is the role you requested");
+      // const dummyArr = [];
+      connection.query(query2, function (err, res) {
+        if (err) throw err;
+        for (let i = 0; i < res.length; i++) {
+          // console.log(res[i].name)    try loop into an array, console.table outside loop
+          // dummyArr.push(res[i]).name;
+          console.table([
+            {
+              "Role name": res[i].title,
+              "Dept Name": res[i].name,
+              "Salary": res[i].salary
+            }]);
+        }
+
+        start();
+
+      })
+    })
+}
+
+
+
+
 
 function viewEmployee() {
   const query = ("SELECT * FROM employee LEFT JOIN role ON employee.role_id=role.id;");
