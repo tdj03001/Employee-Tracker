@@ -170,7 +170,6 @@ async function getDepts() {
       choices.push(data.name);
     });
   })
-  console.log(choices);
 }
 
 
@@ -262,10 +261,10 @@ async function getEmployee() {
       employeeChoices2.push(data.last_name);
     });
   });
-  const query3 = "SELECT * FROM employee"
+  const query3 = "SELECT * FROM role"
   await connection.query(query3).then(res => {
     res.forEach(data => {
-      employeeIDs.push(data.role_id);
+      employeeIDs.push(data.id);
     });
   });
 }
