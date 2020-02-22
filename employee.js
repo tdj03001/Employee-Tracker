@@ -56,6 +56,7 @@ async function start() {
         viewEmployee();
       }
       else if (answer.whatToDo === "Update employee role") {
+        await getEmployee();
         updateEmployeeRole();
       }
       else if (answer.whatToDo === "View entire organization") {
@@ -246,6 +247,7 @@ function viewRole() {
 
 let employeeChoices1 = [];
 let employeeChoices2 = [];
+let employeeIDs = [];
 
 async function getEmployee() {
   const query1 = "SELECT * FROM employee";
@@ -253,14 +255,19 @@ async function getEmployee() {
     res.forEach(data => {
       employeeChoices1.push(data.first_name);
     });
-  })
+  });
   const query2 = "SELECT * FROM employee"
   await connection.query(query2).then(res => {
     res.forEach(data => {
       employeeChoices2.push(data.last_name);
-    })
-  })
-
+    });
+  });
+  const query3 = "SELECT * FROM employee"
+  await connection.query(query3).then(res => {
+    res.forEach(data => {
+      employeeIDs.push(data.role_id);
+    });
+  });
 }
 
 function viewEmployee() {
@@ -300,6 +307,40 @@ function viewEmployee() {
 }
 
 
+function updateEmployeeRole() {
+  inquirer.prompt([
+    {
+      name: "chooseEmployee1",
+      type: "list",
+      message: "First name of the employee would you like to update?",
+      choices: employeeChoices1
+    },
+    {
+      name: "chooseEmployee2",
+      type: "list",
+      message: "Last name of the employee would you like to update?",
+      choices: employeeChoices2
+    },
+    {
+      name: "UpdateToMake",
+      type: "list",
+      message: "Which new role ID do you want to assign to this employee?",
+      choices: employeeIDs
+    }
+  ])
+    .then(function (answer) {
+      const query = "UPDATE staffcms_db.employee SET role_id = " + answer.UpdateToMake + " WHERE first_name = '" + answer.chooseEmployee1 + "' and last_name='" + answer.chooseEmployee2 + "'";
+
+      connection.query(query, function (err, res) {
+        if (err) throw err;
+      });
+      console.log("Role ID updated for " + answer.chooseEmployee1 + " " + answer.chooseEmployee2 + ".");
+      start();
+    })
+
+}
+
+
 
 function viewOrg() {
   const query = ("SELECT * FROM department LEFT JOIN role on department.id = role.department_id JOIN employee on employee.role_id = role.id;");
@@ -323,6 +364,6 @@ function viewOrg() {
 
 /*=================DEV NOTES=====================================================================================
 
-- getDepts/viewDept: getDepts is pushing results to choices array, but choices is undefined when referenced in viewDept function. Why?
+- enhancement: after user selects first name, limit last name choices to only last names that match the selected first name
 
 ================================================================================================================*/
