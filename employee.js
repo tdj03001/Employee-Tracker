@@ -363,6 +363,7 @@ function viewOrg() {
 
 /*=================DEV NOTES=====================================================================================
 
+- known issue: if create role but don't assign an employee to that role, the "view role" won't pull any data.
 - enhancement: after user selects first name, limit last name choices to only last names that match the selected first name
 
 ================================================================================================================*/
