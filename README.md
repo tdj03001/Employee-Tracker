@@ -10,7 +10,7 @@ This Employee Tracker app is a nodeJS-based application for creating and managin
 Users will first use MySQL Workbench to execute the code contained in 'employee.sql' which will create the database and table structure needed for the node app to work. Users will then enter the command 'npm start' into their terminal to start the app. Prompts will run which give the user multiple choices for actions they can take, and for each action taken the staffCMS database will be updated according to those user inputs.  
   
 
-![Screenshot of the app](C:\Users\tyjen\OneDrive\Pictures\employee-tracker-screenshot.png)
+![Screenshot of the app](assets/img/employee-tracker-screenshot.png)
 
 
 
