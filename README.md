@@ -1,4 +1,4 @@
-# UPenn-Week-12-Homework-MySQLEmployeeTracker
+# Employee Tracker
 
 # Description
 
@@ -16,4 +16,4 @@ Users will first use MySQL Workbench to execute the code contained in 'employee.
 
 # Link to GitHub repository
   
-https://github.com/tdj03001/UPenn-Week-12-Homework-MySQLEmployeeTracker
+https://github.com/tdj03001/Employee-Tracker
